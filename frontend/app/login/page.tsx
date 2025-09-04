@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EyeOff, Eye } from "lucide-react";
 import { API_BACKEND_URL } from "@/config";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { isAuthenticated } = useAuth() as {
+          isAuthenticated: boolean;
+      };
+
+  useEffect(()=>{
+    if(isAuthenticated){
+      router.push('/dashboard');
+    }
+  },[]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

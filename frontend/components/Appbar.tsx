@@ -1,11 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-
-type AuthUser = {
-    email: string;
-    // add other user properties if needed
-};
+import { AuthUser } from "@/types";
 
 export function Appbar() {
     const { isAuthenticated, user, logout } = useAuth() as {
