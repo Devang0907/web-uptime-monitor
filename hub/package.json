@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "bun index.ts",
-    "start": "bunx prisma generate && bun run index.ts"
+    "build": "bun install && bun x prisma generate",
+    "start": "bun run index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

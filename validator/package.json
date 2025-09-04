@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
   "dev": "bun index.ts",
+  "build": "bun install",
   "start": "bun run index.ts"
   },
   "devDependencies": {
