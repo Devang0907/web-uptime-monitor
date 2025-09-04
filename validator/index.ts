@@ -14,7 +14,9 @@ async function main() {
     const keypair = Keypair.fromSecretKey(
         bs58.decode(privateKey)
     );
-    const ws = new WebSocket("ws://localhost:8081");
+    const hub_url = process.env.HUB_URL || "ws://localhost:8081";
+    const ws = new WebSocket(hub_url);
+    console.log("Connecting to hub at", hub_url);
 
     ws.onmessage = async (event) => {
         const data: OutgoingMessage = JSON.parse(event.data);
