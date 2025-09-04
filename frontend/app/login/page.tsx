@@ -16,12 +16,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { isAuthenticated } = useAuth() as {
-          isAuthenticated: boolean;
-      };
+  const { login } = useAuth();
 
   useEffect(()=>{
-    if(isAuthenticated){
+    const token = localStorage.getItem("authToken");
+    if(token){
       router.push('/dashboard');
     }
   },[]);
@@ -47,9 +46,8 @@ export default function LoginPage() {
       }
 
       // Store token and user data
-      localStorage.setItem('authToken', data.token);
-      const userData = { userId: data.userId || '', email };
-      localStorage.setItem('userData', JSON.stringify(userData));
+      const userData = { email };
+      login(data.token, userData);
 
       // Redirect to dashboard or home page
       router.push('/dashboard');
