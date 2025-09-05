@@ -26,14 +26,21 @@ export default function HomePage() {
                 <button>
                   <Link
                     href="/login"
+
                     className="px-6 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-orange-500/25 inline-block text-center"
                   >
                     Start Free Trial
                   </Link>
                 </button>
-                {/* <button className="px-8 py-4 border-2 border-gray-600 text-white hover:bg-gray-800 bg-transparent rounded-lg text-lg font-semibold transition-all">
-                  Watch Demo
-                </button> */}
+                <button>
+                  <a
+                    target="_blank"
+                    href="https://petal-chive-450.notion.site/Become-a-Validator-and-Earn-Rewards-with-Web-Uptime-Monitor-2640dfaf8c7e80c8b609c04b2c23fb68"
+                    className="px-6 py-3 border-2 border-orange-600 text-white hover:bg-orange-600 hover:text-white rounded-lg text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-orange-500/25 inline-block text-center"
+                  >
+                    Start Earning In Crypto
+                  </a>
+                </button>
               </div>
             </div>
 
