@@ -117,9 +117,6 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-muted-foreground">
-            {website.uptimePercentage.toFixed(1)}% uptime
-          </span>
           {isExpanded ? (
             <ChevronUp className="w-5 h-5 text-muted-foreground" />
           ) : (
@@ -135,6 +132,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
               <p className="text-sm text-muted-foreground mb-1">Last 30 minutes status:</p>
               <UptimeTicks ticks={website.uptimeTicks} />
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Uptime: {website.uptimePercentage.toFixed(1)}%
+            </p>
             <p className="text-xs text-muted-foreground mt-2">
               Last checked: {website.lastChecked}
             </p>
@@ -205,7 +205,7 @@ function App() {
       // Format the last checked time
       const lastLatency = sortedTicks[0]
         ? sortedTicks[0].latency
-        : 'mS';  
+        : 'NA';
 
       return {
         id: website.id,
