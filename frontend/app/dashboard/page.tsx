@@ -21,7 +21,7 @@ function UptimeTicks({ ticks }: { ticks: UptimeStatus[] }) {
       {ticks.map((tick, index) => (
         <div
           key={index}
-          className={`w-8 h-2 rounded ${tick === 'good' ? 'bg-green-500' : tick === 'bad' ? 'bg-red-500' : 'bg-muted'
+          className={`w-5 lg:w-8 h-2 rounded ${tick === 'good' ? 'bg-green-500' : tick === 'bad' ? 'bg-red-500' : 'bg-muted'
             }`}
         />
       ))}
@@ -76,6 +76,7 @@ interface ProcessedWebsite {
   status: UptimeStatus;
   uptimePercentage: number;
   lastChecked: string;
+  lastLatency: number | string;
   uptimeTicks: UptimeStatus[];
 }
 
@@ -128,7 +129,7 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
       </div>
 
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border flex justify-between items-center">
+        <div className="px-4 pb-4 border-t border-border flex flex-wrap justify-between items-center">
           <div>
             <div className="mt-3">
               <p className="text-sm text-muted-foreground mb-1">Last 30 minutes status:</p>
@@ -136,6 +137,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Last checked: {website.lastChecked}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Last latency: {website.lastLatency} milliseconds
             </p>
           </div>
           <div className='flex items-center'>
@@ -198,12 +202,18 @@ function App() {
         ? new Date(sortedTicks[0].createdAt).toLocaleTimeString()
         : 'Never';
 
+      // Format the last checked time
+      const lastLatency = sortedTicks[0]
+        ? sortedTicks[0].latency
+        : 'mS';  
+
       return {
         id: website.id,
         url: website.url,
         status: currentStatus,
         uptimePercentage,
         lastChecked,
+        lastLatency,
         uptimeTicks: windows,
       };
     });
@@ -214,8 +224,8 @@ function App() {
       <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
-            <Globe className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Uptime Monitor</h1>
+            <Globe className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
+            <h1 className="text-md lg:text-2xl font-bold text-foreground">Uptime Monitor</h1>
           </div>
           <div className="flex items-center space-x-4">
             <button

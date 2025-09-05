@@ -12,7 +12,7 @@ export function Appbar() {
 
     return (
         <div className="flex justify-between items-center p-4 border-b">
-            <div className="text-xl font-semibold">Better Uptime</div>
+            <div className="text-sm lg:text-xl font-semibold">Better Uptime</div>
             {isAuthenticated && (
                 <div className="flex items-center gap-3">
                     {user && (
