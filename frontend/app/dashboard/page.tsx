@@ -129,12 +129,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
         <div className="px-4 pb-4 border-t border-border flex flex-wrap justify-between items-center">
           <div>
             <div className="mt-3">
-              <p className="text-sm text-muted-foreground mb-1">Last 30 minutes status:</p>
+              <p className="text-sm text-muted-foreground mb-1">Last 30 minutes status: ({website.uptimePercentage.toFixed(1)}% uptime)</p>
               <UptimeTicks ticks={website.uptimeTicks} />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Uptime: {website.uptimePercentage.toFixed(1)}%
-            </p>
             <p className="text-xs text-muted-foreground mt-2">
               Last checked: {website.lastChecked}
             </p>
