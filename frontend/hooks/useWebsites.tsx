@@ -2,6 +2,7 @@
 import { API_BACKEND_URL } from "@/config";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Website {
     id: string;
@@ -16,6 +17,7 @@ interface Website {
 
 export function useWebsites() {
     const [websites, setWebsites] = useState<Website[]>([]);
+    const router = useRouter();
 
     async function refreshWebsites() {    
         const token = localStorage.getItem("authToken");
@@ -25,6 +27,10 @@ export function useWebsites() {
             },
         });
 
+        if(response.status == 401){
+            router.push("/login");
+        }
+        
         setWebsites(response.data.websites);
     }
 

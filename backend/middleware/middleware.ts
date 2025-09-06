@@ -3,17 +3,23 @@ import jwt from "jsonwebtoken";
 import { JWT_PUBLIC_KEY } from "../config/config";
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const token = req.headers['authorization'];
-    if (!token) {
+    try {
+        const token = req.headers['authorization'];
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const decoded = jwt.verify(token, JWT_PUBLIC_KEY);
+        if (!decoded || !decoded.sub) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        req.userId = decoded.sub as string;
+
+        next()
+    }
+    catch(error) {
+        console.error('Authentication error:', error);
         return res.status(401).json({ error: 'Unauthorized' });
     }
-
-    const decoded = jwt.verify(token, JWT_PUBLIC_KEY);
-    if (!decoded || !decoded.sub) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    req.userId = decoded.sub as string;
-    
-    next()
 }

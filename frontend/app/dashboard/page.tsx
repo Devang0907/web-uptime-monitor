@@ -70,6 +70,43 @@ function CreateWebsiteModal({ isOpen, onClose }: { isOpen: boolean; onClose: (ur
   );
 }
 
+function DeleteWebsiteModal({ isOpen, onClose, onConfirm }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-background rounded-lg border border-border p-6 w-full max-w-md shadow-xl">
+        <h2 className="text-xl font-semibold mb-4 text-foreground">
+          Confirm Delete
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Are you sure you want to delete this website? This action cannot be undone.
+        </p>
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-md transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-destructive hover:bg-destructive/90 rounded-md transition-colors"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface ProcessedWebsite {
   id: string;
   url: string;
@@ -82,6 +119,7 @@ interface ProcessedWebsite {
 
 function WebsiteCard({ website }: { website: ProcessedWebsite }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const token = localStorage.getItem("authToken");
 
   const deleteWebsite = async () => {
@@ -142,18 +180,26 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
           <div className='flex items-center'>
             <Button size="icon" variant="destructive"
               aria-label="Delete"
-              onClick={deleteWebsite}>
+               onClick={() => setIsDeleteModalOpen(true)}>
               <Trash2 className="h-4 w-4" color="white" />
             </Button>
           </div>
         </div>
       )}
+      <DeleteWebsiteModal
+      isOpen={isDeleteModalOpen}
+      onClose={() => setIsDeleteModalOpen(false)}
+      onConfirm={() => {
+        deleteWebsite(); // call your delete function
+        setIsDeleteModalOpen(false);
+      }}
+    />
     </div>
   );
 }
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { websites, refreshWebsites } = useWebsites();
 
   const processedWebsites = useMemo(() => {
@@ -226,7 +272,7 @@ function App() {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsCreateModalOpen(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200"
             >
               <Plus className="w-4 h-4" />
@@ -243,15 +289,15 @@ function App() {
       </div>
 
       <CreateWebsiteModal
-        isOpen={isModalOpen}
+        isOpen={isCreateModalOpen}
         onClose={async (url) => {
           if (url === null) {
-            setIsModalOpen(false);
+            setIsCreateModalOpen(false);
             return;
           }
 
           const token = localStorage.getItem("authToken");
-          setIsModalOpen(false)
+          setIsCreateModalOpen(false)
           axios.post(`${API_BACKEND_URL}/api/v1/website`, {
             url,
           }, {
