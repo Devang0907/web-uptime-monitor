@@ -9,9 +9,11 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      router.replace("/login");
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        router.replace("/login");
+      }
     }
   }, [router]);
 
