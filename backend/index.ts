@@ -147,7 +147,9 @@ app.post("/api/v1/admin/login", async (req, res) => {
 app.get("/api/v1/admin/stats", adminAuthMiddleware, async (req, res) => {
 
     const users = await prismaClient.user.count();
-    const websites = await prismaClient.website.count();
+    const websites = await prismaClient.website.count({
+        where:{ disabled: false }
+    });
     const validators = await prismaClient.validator.count();
     const amountToPay = await prismaClient.validator.aggregate({
         _sum: {
