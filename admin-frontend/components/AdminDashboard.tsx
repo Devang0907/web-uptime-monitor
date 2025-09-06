@@ -33,17 +33,11 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [payingValidator, setPayingValidator] = useState<string | null>(null);
   const { sendPayment, isConnected } = useSolanaPayment();
-  const [authToken, setAuthToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAuthToken(localStorage.getItem("adminToken"));
-    }
-  }, []);
 
   // Fetch stats from API
   const fetchStats = async () => {
     try {
+      const authToken = localStorage.getItem("adminToken");
       const response = await fetch(`${API_BACKEND_URL}/api/v1/admin/stats`, {
         headers: {
           'Authorization': `${authToken}`
@@ -62,6 +56,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch validators from API
   const fetchValidators = async () => {
     try {
+      const authToken = localStorage.getItem("adminToken");
       const response = await fetch(`${API_BACKEND_URL}/api/v1/admin/validators`, {
         headers: {
           'Authorization': `${authToken}`
@@ -82,6 +77,7 @@ const AdminDashboard: React.FC = () => {
   // Mark validator as paid
   const markAsPaid = async (validatorId: string) => {
     try {
+      const authToken = localStorage.getItem("adminToken");
       const response = await fetch(`${API_BACKEND_URL}/api/v1/admin/paid`, {
         method: 'POST',
         headers: {
