@@ -25,6 +25,7 @@ interface Validator {
   name?: string;
   status: 'active' | 'inactive';
   lastValidation?: string;
+  location: string;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -231,7 +232,7 @@ const AdminDashboard: React.FC = () => {
                 <TableRow>
                   <TableHead>Validator ID</TableHead>
                   <TableHead>Public Key</TableHead>
-                  <TableHead className="text-right">Pending Payouts (in SOL)</TableHead>
+                  <TableHead>Location</TableHead>
                   <TableHead className="text-right">Pending Payouts</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -254,6 +255,9 @@ const AdminDashboard: React.FC = () => {
                         <Copy className="h-4 w-4" />
                       </button>
                     </TableCell>
+                    <TableCell className="font-medium">
+                      {validator.location}
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {validator.pendingPayouts > 0 ? (
                         <span className="text-orange-600">
@@ -261,15 +265,6 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       ) : (
                         <span className="text-gray-500">0 SOL</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {validator.pendingPayouts > 0 ? (
-                        <span className="text-orange-600">
-                          {validator.pendingPayouts} Lamports
-                        </span>
-                      ) : (
-                        <span className="text-gray-500">0 Lamports</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

@@ -4,6 +4,7 @@ import { prismaClient } from "./db/index";
 import { PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
 import nacl_util from "tweetnacl-util";
+import geoip from "geoip-lite";
 
 const availableValidators: { validatorId: string, socket: ServerWebSocket<unknown>, publicKey: string }[] = [];
 
@@ -67,12 +68,35 @@ async function signupHandler(ws: ServerWebSocket<unknown>, { ip, publicKey, sign
         return;
     }
 
-    //TODO: Given the ip, return the location
+    // Given the ip, find the location
+    let location = "unknown";
+    try {
+        if (!isPrivateIP(ip)) {
+            const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+            const geo = await geoRes.json() as { country_name?: string; city?: string };
+
+            if (geo && geo.country_name) {
+                location = `${geo.city || "Unknown City"}, ${geo.country_name}`;
+            }
+        }
+    } catch (err) {
+        console.error("ipapi.co lookup failed:", err);
+    }
+    // fallback to geoip-lite if still unknown
+    if (location === "unknown") {
+        const geoLib = geoip.lookup(ip);
+        if (geoLib) {
+            location = `${geoLib.city || "Unknown City"}, ${geoLib.country}`;
+        }
+    }
+
+    console.log(`NeW Validator location: ${location}`);
+    // Create a new validator
     const validator = await prismaClient.validator.create({
         data: {
             ip,
             publicKey,
-            location: 'unknown',
+            location,
         },
     });
 
@@ -156,5 +180,12 @@ setInterval(async () => {
         });
     }
 }, 60 * 1000);
+
+function isPrivateIP(ip: string) {
+  return /^10\./.test(ip) ||
+         /^127\./.test(ip) ||
+         /^192\.168\./.test(ip) ||
+         /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip);
+}
 
 console.log("Hub server started on port 8081");

@@ -18,6 +18,8 @@
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "@solana/web3.js": "^1.98.4",
+    "@types/geoip-lite": "^1.4.4",
+    "geoip-lite": "^1.4.10",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   }

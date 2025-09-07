@@ -4,8 +4,9 @@ import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
 import nacl_util from "tweetnacl-util";
 import bs58 from 'bs58';
+import os from "os";
 
-const CALLBACKS: {[callbackId: string]: (data: SignupOutgoingMessage) => void} = {}
+const CALLBACKS: { [callbackId: string]: (data: SignupOutgoingMessage) => void } = {}
 
 let validatorId: string | null = null;
 
@@ -30,16 +31,21 @@ async function main() {
 
     ws.onopen = async () => {
         const callbackId = randomUUIDv7();
+        const res = await fetch("https://api.ipify.org?format=json");
+        const { ip } = await res.json() as { ip: string };
+        
         CALLBACKS[callbackId] = (data: SignupOutgoingMessage) => {
             validatorId = data.validatorId;
         }
         const signedMessage = await signMessage(`Signed message for ${callbackId}, ${keypair.publicKey}`, keypair);
 
+        console.log(`Registering validator from ip ${ip}`);
+
         ws.send(JSON.stringify({
             type: 'signup',
             data: {
                 callbackId,
-                ip: '127.0.0.1',
+                ip,
                 publicKey: keypair.publicKey,
                 signedMessage,
             },
@@ -76,7 +82,7 @@ async function validateHandler(ws: WebSocket, { url, callbackId, websiteId }: Va
             type: 'validate',
             data: {
                 callbackId,
-                status:'Bad',
+                status: 'Bad',
                 latency: 1000,
                 websiteId,
                 validatorId,
