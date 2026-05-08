@@ -8,7 +8,7 @@ import geoip from "geoip-lite";
 
 const availableValidators: { validatorId: string, socket: ServerWebSocket<unknown>, publicKey: string }[] = [];
 
-const CALLBACKS: { [callbackId: string]: (data: IncomingMessage) => void } = {}
+const CALLBACKS: { [callbackId: string]: (data: IncomingMessage) => Promise<void> | void } = {}
 const COST_PER_VALIDATION = 100; // in lamports
 
 Bun.serve({
@@ -34,12 +34,26 @@ Bun.serve({
                     await signupHandler(ws, data.data);
                 }
             } else if (data.type === 'validate') {
-                CALLBACKS[data.data.callbackId](data);
+                const callback = CALLBACKS[data.data.callbackId];
                 delete CALLBACKS[data.data.callbackId];
+
+                if (!callback) {
+                    console.warn(`No callback registered for ${data.data.callbackId}`);
+                    return;
+                }
+
+                try {
+                    await callback(data);
+                } catch (err) {
+                    console.error(`Validation callback failed for ${data.data.callbackId}:`, err);
+                }
             }
         },
         async close(ws: ServerWebSocket<unknown>) {
-            availableValidators.splice(availableValidators.findIndex(v => v.socket === ws), 1);
+            const validatorIndex = availableValidators.findIndex(v => v.socket === ws);
+            if (validatorIndex !== -1) {
+                availableValidators.splice(validatorIndex, 1);
+            }
         }
     },
 });
@@ -141,13 +155,15 @@ setInterval(async () => {
                 type: 'validate',
                 data: {
                     url: website.url,
-                    callbackId
+                    callbackId,
+                    websiteId: website.id
                 },
             }));
 
             CALLBACKS[callbackId] = async (data: IncomingMessage) => {
                 if (data.type === 'validate') {
-                    const { validatorId, status, latency, signedMessage } = data.data;
+                    const { status, latency, signedMessage } = data.data;
+                    const { validatorId } = validator;
                     const verified = await verifyMessage(
                         `Replying to ${callbackId}`,
                         validator.publicKey,
@@ -157,8 +173,8 @@ setInterval(async () => {
                         return;
                     }
 
-                    await prismaClient.$transaction(async (tx: any) => {
-                        await tx.websiteTick.create({
+                    await prismaClient.$transaction([
+                        prismaClient.websiteTick.create({
                             data: {
                                 websiteId: website.id,
                                 validatorId,
@@ -166,15 +182,15 @@ setInterval(async () => {
                                 latency,
                                 createdAt: new Date(),
                             },
-                        });
+                        }),
 
-                        await tx.validator.update({
+                        prismaClient.validator.update({
                             where: { id: validatorId },
                             data: {
                                 pendingPayouts: { increment: COST_PER_VALIDATION },
                             },
-                        });
-                    });
+                        }),
+                    ]);
                 }
             };
         });

@@ -165,6 +165,86 @@ app.get("/api/v1/admin/stats", adminAuthMiddleware, async (req, res) => {
     });
 });
 
+app.get("/api/v1/admin/users", adminAuthMiddleware, async (req, res) => {
+
+    const [users, websites] = await Promise.all([
+        prismaClient.user.findMany({
+            select: {
+                id: true,
+                email: true
+            },
+            orderBy: {
+                email: "asc"
+            }
+        }),
+        prismaClient.website.findMany({
+            select: {
+                userId: true,
+                disabled: true
+            }
+        })
+    ]);
+
+    const websiteCounts = websites.reduce((counts, website) => {
+        const existing = counts.get(website.userId) || { total: 0, active: 0 };
+        existing.total += 1;
+        if (!website.disabled) {
+            existing.active += 1;
+        }
+        counts.set(website.userId, existing);
+        return counts;
+    }, new Map<string, { total: number; active: number }>());
+
+    res.status(200).json({
+        users: users.map(user => {
+            const counts = websiteCounts.get(user.id);
+            return {
+                ...user,
+                websiteCount: counts?.total || 0,
+                activeWebsiteCount: counts?.active || 0
+            };
+        })
+    });
+});
+
+app.get("/api/v1/admin/websites", adminAuthMiddleware, async (req, res) => {
+
+    const [websites, users] = await Promise.all([
+        prismaClient.website.findMany({
+            include: {
+                ticks: {
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    take: 1
+                },
+                _count: {
+                    select: {
+                        ticks: true
+                    }
+                }
+            }
+        }),
+        prismaClient.user.findMany({
+            select: {
+                id: true,
+                email: true
+            }
+        })
+    ]);
+
+    const userEmailById = new Map(users.map(user => [user.id, user.email]));
+
+    res.status(200).json({
+        websites: websites.map(({ ticks, _count, ...website }) => ({
+            ...website,
+            ownerEmail: userEmailById.get(website.userId) || "Unknown user",
+            tickCount: _count.ticks,
+            latestTick: ticks[0] || null
+        }))
+    });
+});
+
 app.get("/api/v1/admin/validators", adminAuthMiddleware, async (req, res) => {
 
     const validators = await prismaClient.validator.findMany();
